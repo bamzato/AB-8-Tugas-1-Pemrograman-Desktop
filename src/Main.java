@@ -64,6 +64,17 @@ public class Main {
         return String.format(Locale.forLanguageTag("id-ID"), "Rp%,.0f", harga);
     }
 
+    private static double hitungSubtotal(Menu[] pesanan, int[] jumlahPesanan,
+            int jumlahItemPesanan) {
+        double subtotal = 0;
+
+        for (int i = 0; i < jumlahItemPesanan; i++) {
+            subtotal = subtotal + (pesanan[i].getHarga() * jumlahPesanan[i]);
+        }
+
+        return subtotal;
+    }
+
     private static int prosesPemesanan(Scanner scanner, Menu[] daftarMenu,
             Menu[] pesanan, int[] jumlahPesanan) {
         System.out.println();
@@ -196,5 +207,9 @@ public class Main {
                     jumlah,
                     formatRupiah(nilaiItem));
         }
+
+        double subtotal = hitungSubtotal(pesanan, jumlahPesanan, jumlahItemPesanan);
+        System.out.println();
+        System.out.println("Subtotal: " + formatRupiah(subtotal));
     }
 }
