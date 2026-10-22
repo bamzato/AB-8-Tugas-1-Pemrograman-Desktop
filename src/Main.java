@@ -141,6 +141,11 @@ public class Main {
         return 0;
     }
 
+    private static double hitungTotalAkhir(double subtotal, double diskon, double nilaiPromo,
+            double pajak, double biayaPelayanan) {
+        return subtotal - diskon - nilaiPromo + pajak + biayaPelayanan;
+    }
+
     private static int prosesPemesanan(Scanner scanner, Menu[] daftarMenu,
             Menu[] pesanan, int[] jumlahPesanan) {
         System.out.println();
@@ -305,5 +310,10 @@ public class Main {
         System.out.println("Dasar Pengenaan Pajak: " + formatRupiah(dasarPajak));
         System.out.println("Pajak (10%): " + formatRupiah(pajak));
         System.out.println("Biaya Pelayanan: " + formatRupiah(biayaPelayanan));
+
+        double totalAkhir = hitungTotalAkhir(
+                subtotal, diskon, nilaiPromo, pajak, biayaPelayanan);
+        System.out.println();
+        System.out.println("Total Akhir: " + formatRupiah(totalAkhir));
     }
 }
