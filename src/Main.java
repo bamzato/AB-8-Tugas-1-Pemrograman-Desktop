@@ -2,13 +2,20 @@ import java.util.Locale;
 import java.util.Scanner;
 
 public class Main {
+    private static final int KAPASITAS_PESANAN = 5;
+
     public static void main(String[] args) {
         Menu[] daftarMenu = buatDaftarMenu();
         tampilkanDaftarMenu(daftarMenu);
 
+        Menu[] pesanan = new Menu[KAPASITAS_PESANAN];
+        int[] jumlahPesanan = new int[KAPASITAS_PESANAN];
+
         Scanner scanner = new Scanner(System.in);
-        prosesPemesanan(scanner, daftarMenu);
+        int jumlahItemPesanan = prosesPemesanan(scanner, daftarMenu, pesanan, jumlahPesanan);
         scanner.close();
+
+        tampilkanRingkasanPesanan(pesanan, jumlahPesanan, jumlahItemPesanan);
     }
 
     private static Menu[] buatDaftarMenu() {
@@ -57,12 +64,14 @@ public class Main {
         return String.format(Locale.forLanguageTag("id-ID"), "Rp%,.0f", harga);
     }
 
-    private static void prosesPemesanan(Scanner scanner, Menu[] daftarMenu) {
+    private static int prosesPemesanan(Scanner scanner, Menu[] daftarMenu,
+            Menu[] pesanan, int[] jumlahPesanan) {
         System.out.println();
         System.out.println("=== PEMESANAN PELANGGAN ===");
         System.out.println("Ketik 'selesai' untuk mengakhiri pemesanan.");
 
         boolean pemesananSelesai = false;
+        int jumlahItemPesanan = 0;
 
         while (!pemesananSelesai) {
             System.out.print("Masukkan nomor menu: ");
@@ -118,12 +127,68 @@ public class Main {
 
                 if (!pemesananSelesai) {
                     Menu menuTerpilih = daftarMenu[nomorMenu - 1];
-                    System.out.println("Pesanan dicatat: " + jumlah + " x " + menuTerpilih.getNama());
+                    int indeksPesanan = cariIndeksPesanan(pesanan, jumlahItemPesanan, menuTerpilih);
+
+                    if (indeksPesanan != -1) {
+                        jumlahPesanan[indeksPesanan] = jumlahPesanan[indeksPesanan] + jumlah;
+                        System.out.println("Pesanan digabungkan: " + jumlah + " x "
+                                + menuTerpilih.getNama() + " (total "
+                                + jumlahPesanan[indeksPesanan] + ").");
+                    } else if (jumlahItemPesanan < pesanan.length) {
+                        pesanan[jumlahItemPesanan] = menuTerpilih;
+                        jumlahPesanan[jumlahItemPesanan] = jumlah;
+                        jumlahItemPesanan++;
+
+                        System.out.println("Pesanan dicatat: " + jumlah + " x " + menuTerpilih.getNama());
+                    } else {
+                        System.out.println("Kapasitas pesanan sudah penuh. Pesanan baru tidak dapat ditambahkan.");
+                        System.out.println("Data pesanan yang sudah tersimpan tetap dipertahankan.");
+                    }
+
                     System.out.println();
                 }
             }
         }
 
         System.out.println("Pemesanan telah berakhir.");
+        return jumlahItemPesanan;
+    }
+
+    private static int cariIndeksPesanan(Menu[] pesanan, int jumlahItemPesanan, Menu menuDicari) {
+        for (int i = 0; i < jumlahItemPesanan; i++) {
+            if (pesanan[i] == menuDicari) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    private static void tampilkanRingkasanPesanan(Menu[] pesanan, int[] jumlahPesanan,
+            int jumlahItemPesanan) {
+        System.out.println();
+        System.out.println("=== RINGKASAN PESANAN ===");
+
+        if (jumlahItemPesanan == 0) {
+            System.out.println("Belum ada pesanan.");
+            return;
+        }
+
+        System.out.printf("%-4s %-20s %14s %8s %16s%n",
+                "No", "Nama", "Harga Satuan", "Jumlah", "Nilai per Item");
+        System.out.println("----------------------------------------------------------------------");
+
+        for (int i = 0; i < jumlahItemPesanan; i++) {
+            Menu menu = pesanan[i];
+            int jumlah = jumlahPesanan[i];
+            double nilaiItem = menu.getHarga() * jumlah;
+
+            System.out.printf("%-4d %-20s %14s %8d %16s%n",
+                    i + 1,
+                    menu.getNama(),
+                    formatRupiah(menu.getHarga()),
+                    jumlah,
+                    formatRupiah(nilaiItem));
+        }
     }
 }
