@@ -6,6 +6,8 @@ public class Main {
     private static final double BATAS_DISKON = 100000;
     private static final double BATAS_PROMO = 50000;
     private static final double PERSENTASE_DISKON = 0.10;
+    private static final double TARIF_PAJAK = 0.10;
+    private static final double BIAYA_PELAYANAN = 20000;
 
     public static void main(String[] args) {
         Menu[] daftarMenu = buatDaftarMenu();
@@ -115,6 +117,28 @@ public class Main {
         }
 
         return indeksPromo;
+    }
+
+    private static double hitungDasarPajak(double subtotal, double diskon, double nilaiPromo) {
+        double dasarPajak = subtotal - diskon - nilaiPromo;
+
+        if (dasarPajak < 0) {
+            return 0;
+        }
+
+        return dasarPajak;
+    }
+
+    private static double hitungPajak(double dasarPajak) {
+        return dasarPajak * TARIF_PAJAK;
+    }
+
+    private static double hitungBiayaPelayanan(int jumlahItemPesanan) {
+        if (jumlahItemPesanan > 0) {
+            return BIAYA_PELAYANAN;
+        }
+
+        return 0;
     }
 
     private static int prosesPemesanan(Scanner scanner, Menu[] daftarMenu,
@@ -259,10 +283,12 @@ public class Main {
         System.out.println("Subtotal: " + formatRupiah(subtotal));
         System.out.println("Diskon (10%): " + formatRupiah(diskon));
 
+        double nilaiPromo = 0;
+
         if (indeksPromo != -1) {
             Menu minumanPromo = pesanan[indeksPromo];
             int unitGratis = hitungUnitGratis(jumlahPesanan[indeksPromo]);
-            double nilaiPromo = hitungNilaiPromo(minumanPromo, jumlahPesanan[indeksPromo]);
+            nilaiPromo = hitungNilaiPromo(minumanPromo, jumlahPesanan[indeksPromo]);
 
             System.out.println("Promo Beli 1 Gratis 1: " + minumanPromo.getNama()
                     + " (" + unitGratis + " unit gratis)");
@@ -271,5 +297,13 @@ public class Main {
             System.out.println("Promo Beli 1 Gratis 1: Tidak berlaku");
             System.out.println("Nilai Promo: " + formatRupiah(0));
         }
+
+        double dasarPajak = hitungDasarPajak(subtotal, diskon, nilaiPromo);
+        double pajak = hitungPajak(dasarPajak);
+        double biayaPelayanan = hitungBiayaPelayanan(jumlahItemPesanan);
+
+        System.out.println("Dasar Pengenaan Pajak: " + formatRupiah(dasarPajak));
+        System.out.println("Pajak (10%): " + formatRupiah(pajak));
+        System.out.println("Biaya Pelayanan: " + formatRupiah(biayaPelayanan));
     }
 }
