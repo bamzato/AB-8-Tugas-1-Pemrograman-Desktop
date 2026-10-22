@@ -1,9 +1,14 @@
 import java.util.Locale;
+import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
         Menu[] daftarMenu = buatDaftarMenu();
         tampilkanDaftarMenu(daftarMenu);
+
+        Scanner scanner = new Scanner(System.in);
+        prosesPemesanan(scanner, daftarMenu);
+        scanner.close();
     }
 
     private static Menu[] buatDaftarMenu() {
@@ -50,5 +55,75 @@ public class Main {
 
     private static String formatRupiah(double harga) {
         return String.format(Locale.forLanguageTag("id-ID"), "Rp%,.0f", harga);
+    }
+
+    private static void prosesPemesanan(Scanner scanner, Menu[] daftarMenu) {
+        System.out.println();
+        System.out.println("=== PEMESANAN PELANGGAN ===");
+        System.out.println("Ketik 'selesai' untuk mengakhiri pemesanan.");
+
+        boolean pemesananSelesai = false;
+
+        while (!pemesananSelesai) {
+            System.out.print("Masukkan nomor menu: ");
+            String inputMenu = scanner.nextLine().trim();
+
+            if (inputMenu.equalsIgnoreCase("selesai")) {
+                pemesananSelesai = true;
+            } else {
+                int nomorMenu = 0;
+                boolean nomorValid = false;
+
+                try {
+                    nomorMenu = Integer.parseInt(inputMenu);
+
+                    if (nomorMenu >= 1
+                            && nomorMenu <= daftarMenu.length
+                            && daftarMenu[nomorMenu - 1] != null) {
+                        nomorValid = true;
+                    }
+                } catch (NumberFormatException e) {
+                    nomorValid = false;
+                }
+
+                if (!nomorValid) {
+                    System.out.println("Nomor menu tidak valid. Silakan pilih nomor menu yang tersedia.");
+                    continue;
+                }
+
+                int jumlah = 0;
+                boolean jumlahValid = false;
+
+                while (!jumlahValid) {
+                    System.out.print("Masukkan jumlah: ");
+                    String inputJumlah = scanner.nextLine().trim();
+
+                    if (inputJumlah.equalsIgnoreCase("selesai")) {
+                        pemesananSelesai = true;
+                        break;
+                    }
+
+                    try {
+                        jumlah = Integer.parseInt(inputJumlah);
+
+                        if (jumlah > 0) {
+                            jumlahValid = true;
+                        } else {
+                            System.out.println("Jumlah harus berupa bilangan bulat positif. Silakan coba lagi.");
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("Jumlah harus berupa bilangan bulat positif. Silakan coba lagi.");
+                    }
+                }
+
+                if (!pemesananSelesai) {
+                    Menu menuTerpilih = daftarMenu[nomorMenu - 1];
+                    System.out.println("Pesanan dicatat: " + jumlah + " x " + menuTerpilih.getNama());
+                    System.out.println();
+                }
+            }
+        }
+
+        System.out.println("Pemesanan telah berakhir.");
     }
 }
