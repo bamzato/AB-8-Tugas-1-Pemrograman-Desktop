@@ -79,6 +79,9 @@ public class Main {
 
             if (inputMenu.equalsIgnoreCase("selesai")) {
                 pemesananSelesai = true;
+            } else if (inputMenu.isEmpty()) {
+                System.out.println("Nomor menu tidak boleh kosong. Silakan pilih nomor menu yang tersedia.");
+                continue;
             } else {
                 int nomorMenu = 0;
                 boolean nomorValid = false;
@@ -110,6 +113,9 @@ public class Main {
                     if (inputJumlah.equalsIgnoreCase("selesai")) {
                         pemesananSelesai = true;
                         break;
+                    } else if (inputJumlah.isEmpty()) {
+                        System.out.println("Jumlah tidak boleh kosong. Silakan masukkan bilangan bulat positif.");
+                        continue;
                     }
 
                     try {
