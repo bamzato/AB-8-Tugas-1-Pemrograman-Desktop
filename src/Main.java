@@ -3,6 +3,9 @@ import java.util.Scanner;
 
 public class Main {
     private static final int KAPASITAS_PESANAN = 5;
+    private static final double BATAS_DISKON = 100000;
+    private static final double BATAS_PROMO = 50000;
+    private static final double PERSENTASE_DISKON = 0.10;
 
     public static void main(String[] args) {
         Menu[] daftarMenu = buatDaftarMenu();
@@ -73,6 +76,45 @@ public class Main {
         }
 
         return subtotal;
+    }
+
+    private static double hitungDiskon(double subtotal) {
+        if (subtotal > BATAS_DISKON) {
+            return subtotal * PERSENTASE_DISKON;
+        }
+
+        return 0;
+    }
+
+    private static int hitungUnitGratis(int jumlahPesanan) {
+        return jumlahPesanan / 2;
+    }
+
+    private static double hitungNilaiPromo(Menu menu, int jumlahPesanan) {
+        return hitungUnitGratis(jumlahPesanan) * menu.getHarga();
+    }
+
+    private static int cariIndeksPromoMinuman(Menu[] pesanan, int[] jumlahPesanan,
+            int jumlahItemPesanan, double subtotal) {
+        if (subtotal <= BATAS_PROMO) {
+            return -1;
+        }
+
+        int indeksPromo = -1;
+        double nilaiPromoTerbesar = 0;
+
+        for (int i = 0; i < jumlahItemPesanan; i++) {
+            if (pesanan[i].getKategori().equals("Minuman")) {
+                double nilaiPromo = hitungNilaiPromo(pesanan[i], jumlahPesanan[i]);
+
+                if (nilaiPromo > nilaiPromoTerbesar) {
+                    nilaiPromoTerbesar = nilaiPromo;
+                    indeksPromo = i;
+                }
+            }
+        }
+
+        return indeksPromo;
     }
 
     private static int prosesPemesanan(Scanner scanner, Menu[] daftarMenu,
@@ -209,7 +251,25 @@ public class Main {
         }
 
         double subtotal = hitungSubtotal(pesanan, jumlahPesanan, jumlahItemPesanan);
+        double diskon = hitungDiskon(subtotal);
+        int indeksPromo = cariIndeksPromoMinuman(
+                pesanan, jumlahPesanan, jumlahItemPesanan, subtotal);
+
         System.out.println();
         System.out.println("Subtotal: " + formatRupiah(subtotal));
+        System.out.println("Diskon (10%): " + formatRupiah(diskon));
+
+        if (indeksPromo != -1) {
+            Menu minumanPromo = pesanan[indeksPromo];
+            int unitGratis = hitungUnitGratis(jumlahPesanan[indeksPromo]);
+            double nilaiPromo = hitungNilaiPromo(minumanPromo, jumlahPesanan[indeksPromo]);
+
+            System.out.println("Promo Beli 1 Gratis 1: " + minumanPromo.getNama()
+                    + " (" + unitGratis + " unit gratis)");
+            System.out.println("Nilai Promo: " + formatRupiah(nilaiPromo));
+        } else {
+            System.out.println("Promo Beli 1 Gratis 1: Tidak berlaku");
+            System.out.println("Nilai Promo: " + formatRupiah(0));
+        }
     }
 }
