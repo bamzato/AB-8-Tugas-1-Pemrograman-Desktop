@@ -252,6 +252,45 @@ public class Main {
         return -1;
     }
 
+    private static void tampilkanBarisItem(int nomor, Menu menu, int jumlah, double nilaiItem) {
+        int lebarNama = 20;
+        String nama = menu.getNama();
+        int awal = 0;
+        boolean barisPertama = true;
+
+        while (awal < nama.length()) {
+            int akhir = Math.min(awal + lebarNama, nama.length());
+
+            if (akhir < nama.length()) {
+                int spasiTerakhir = nama.lastIndexOf(' ', akhir - 1);
+
+                if (spasiTerakhir > awal) {
+                    akhir = spasiTerakhir;
+                }
+            }
+
+            String potonganNama = nama.substring(awal, akhir).trim();
+
+            if (barisPertama) {
+                System.out.printf("%-4d %-20s %14s %8d %16s%n",
+                        nomor,
+                        potonganNama,
+                        formatRupiah(menu.getHarga()),
+                        jumlah,
+                        formatRupiah(nilaiItem));
+                barisPertama = false;
+            } else {
+                System.out.printf("%-4s %-20s%n", "", potonganNama);
+            }
+
+            awal = akhir;
+
+            while (awal < nama.length() && nama.charAt(awal) == ' ') {
+                awal++;
+            }
+        }
+    }
+
     private static void tampilkanRingkasanPesanan(Menu[] pesanan, int[] jumlahPesanan,
             int jumlahItemPesanan) {
         System.out.println();
@@ -262,6 +301,7 @@ public class Main {
             return;
         }
 
+        System.out.println("Rincian Item:");
         System.out.printf("%-4s %-20s %14s %8s %16s%n",
                 "No", "Nama", "Harga Satuan", "Jumlah", "Nilai per Item");
         System.out.println("----------------------------------------------------------------------");
@@ -271,12 +311,7 @@ public class Main {
             int jumlah = jumlahPesanan[i];
             double nilaiItem = menu.getHarga() * jumlah;
 
-            System.out.printf("%-4d %-20s %14s %8d %16s%n",
-                    i + 1,
-                    menu.getNama(),
-                    formatRupiah(menu.getHarga()),
-                    jumlah,
-                    formatRupiah(nilaiItem));
+            tampilkanBarisItem(i + 1, menu, jumlah, nilaiItem);
         }
 
         double subtotal = hitungSubtotal(pesanan, jumlahPesanan, jumlahItemPesanan);
@@ -285,8 +320,14 @@ public class Main {
                 pesanan, jumlahPesanan, jumlahItemPesanan, subtotal);
 
         System.out.println();
+        System.out.println("Rincian Biaya:");
         System.out.println("Subtotal: " + formatRupiah(subtotal));
-        System.out.println("Diskon (10%): " + formatRupiah(diskon));
+
+        if (diskon > 0) {
+            System.out.println("Diskon (10%): " + formatRupiah(diskon));
+        } else {
+            System.out.println("Diskon (10%): " + formatRupiah(0) + " (tidak berlaku)");
+        }
 
         double nilaiPromo = 0;
 
@@ -314,6 +355,7 @@ public class Main {
         double totalAkhir = hitungTotalAkhir(
                 subtotal, diskon, nilaiPromo, pajak, biayaPelayanan);
         System.out.println();
+        System.out.println("----------------------------------------------------------------------");
         System.out.println("Total Akhir: " + formatRupiah(totalAkhir));
     }
 }
