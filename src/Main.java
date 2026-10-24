@@ -11,16 +11,25 @@ public class Main {
 
     public static void main(String[] args) {
         Menu[] daftarMenu = buatDaftarMenu();
-        tampilkanDaftarMenu(daftarMenu);
-
-        Menu[] pesanan = new Menu[KAPASITAS_PESANAN];
-        int[] jumlahPesanan = new int[KAPASITAS_PESANAN];
-
         Scanner scanner = new Scanner(System.in);
-        int jumlahItemPesanan = prosesPemesanan(scanner, daftarMenu, pesanan, jumlahPesanan);
-        scanner.close();
 
-        tampilkanRingkasanPesanan(pesanan, jumlahPesanan, jumlahItemPesanan);
+        boolean keluarAplikasi = false;
+
+        while (!keluarAplikasi) {
+            tampilkanMenuUtama();
+            int pilihanUtama = bacaPilihanMenu(scanner, 0, 2);
+
+            if (pilihanUtama == 0) {
+                keluarAplikasi = true;
+                System.out.println("Terima kasih. Aplikasi telah keluar.");
+            } else if (pilihanUtama == 1) {
+                jalankanPemesananPelanggan(scanner, daftarMenu);
+            } else if (pilihanUtama == 2) {
+                jalankanMenuPemilik(scanner, daftarMenu);
+            }
+        }
+
+        scanner.close();
     }
 
     private static Menu[] buatDaftarMenu() {
@@ -39,7 +48,19 @@ public class Main {
         return daftarMenu;
     }
 
+    private static void tampilkanMenuUtama() {
+        System.out.println();
+        System.out.println("========================================");
+        System.out.println("              MENU UTAMA");
+        System.out.println("========================================");
+        System.out.println("1. Customer");
+        System.out.println("2. Restaurant Owner");
+        System.out.println("0. Exit");
+        System.out.println("========================================");
+    }
+
     private static void tampilkanDaftarMenu(Menu[] daftarMenu) {
+        System.out.println();
         System.out.println("========================================");
         System.out.println("          DAFTAR MENU RESTORAN");
         System.out.println("========================================");
@@ -49,6 +70,29 @@ public class Main {
         tampilkanMenuBerdasarkanKategori(daftarMenu, "Makanan");
         System.out.println();
         tampilkanMenuBerdasarkanKategori(daftarMenu, "Minuman");
+        System.out.println("========================================");
+    }
+
+    private static void tampilkanMenuPemilik() {
+        System.out.println();
+        System.out.println("========================================");
+        System.out.println("            MENU PEMILIK RESTORAN");
+        System.out.println("========================================");
+        System.out.println("1. Manage Restaurant Menu");
+        System.out.println("0. Back to Main Menu");
+        System.out.println("========================================");
+    }
+
+    private static void tampilkanMenuPengelolaanMenu() {
+        System.out.println();
+        System.out.println("========================================");
+        System.out.println("           PENGELOLAAN MENU");
+        System.out.println("========================================");
+        System.out.println("1. Add menu items");
+        System.out.println("2. Change menu prices");
+        System.out.println("3. Delete menu items");
+        System.out.println("0. Back to Owner Menu");
+        System.out.println("========================================");
     }
 
     private static void tampilkanMenuBerdasarkanKategori(Menu[] daftarMenu, String kategori) {
@@ -61,6 +105,98 @@ public class Main {
                         daftarMenu[i].getNama(),
                         daftarMenu[i].getKategori(),
                         formatRupiah(daftarMenu[i].getHarga()));
+            }
+        }
+    }
+
+    private static int bacaPilihanMenu(Scanner scanner, int minPilihan, int maxPilihan) {
+        while (true) {
+            try {
+                if (!scanner.hasNextLine()) {
+                    System.out.println();
+                    System.out.println("Terima kasih. Aplikasi telah keluar.");
+                    return 0;
+                }
+
+                System.out.print("Masukkan pilihan: ");
+                String input = scanner.nextLine().trim();
+
+                if (input.isEmpty()) {
+                    System.out.println("Pilihan tidak boleh kosong. Silakan pilih nomor yang tersedia.");
+                    continue;
+                }
+
+                try {
+                    long nilaiLong = Long.parseLong(input);
+
+                    if (nilaiLong < Integer.MIN_VALUE || nilaiLong > Integer.MAX_VALUE) {
+                        System.out.println("Pilihan terlalu besar. Silakan pilih nomor yang tersedia.");
+                        continue;
+                    }
+
+                    int pilihan = (int) nilaiLong;
+
+                    if (pilihan < minPilihan || pilihan > maxPilihan) {
+                        System.out.println("Pilihan tidak valid. Silakan pilih nomor yang tersedia.");
+                        continue;
+                    }
+
+                    return pilihan;
+                } catch (NumberFormatException e) {
+                    System.out.println("Pilihan harus berupa angka. Silakan pilih nomor yang tersedia.");
+                }
+            } catch (Exception e) {
+                System.out.println();
+                System.out.println("Terima kasih. Aplikasi telah keluar.");
+                return 0;
+            }
+        }
+    }
+
+    private static void jalankanPemesananPelanggan(Scanner scanner, Menu[] daftarMenu) {
+        Menu[] pesanan = new Menu[KAPASITAS_PESANAN];
+        int[] jumlahPesanan = new int[KAPASITAS_PESANAN];
+
+        tampilkanDaftarMenu(daftarMenu);
+        int jumlahItemPesanan = prosesPemesanan(scanner, daftarMenu, pesanan, jumlahPesanan);
+        tampilkanRingkasanPesanan(pesanan, jumlahPesanan, jumlahItemPesanan);
+
+        System.out.println();
+        System.out.println("Kembali ke menu utama.");
+    }
+
+    private static void jalankanMenuPemilik(Scanner scanner, Menu[] daftarMenu) {
+        boolean kembaliKeUtama = false;
+
+        while (!kembaliKeUtama) {
+            tampilkanMenuPemilik();
+            int pilihanPemilik = bacaPilihanMenu(scanner, 0, 1);
+
+            if (pilihanPemilik == 0) {
+                kembaliKeUtama = true;
+                System.out.println("Kembali ke menu utama.");
+            } else if (pilihanPemilik == 1) {
+                jalankanMenuPengelolaanMenu(scanner, daftarMenu);
+            }
+        }
+    }
+
+    private static void jalankanMenuPengelolaanMenu(Scanner scanner, Menu[] daftarMenu) {
+        boolean kembaliKePemilik = false;
+
+        while (!kembaliKePemilik) {
+            tampilkanMenuPengelolaanMenu();
+            int pilihanPengelolaan = bacaPilihanMenu(scanner, 0, 3);
+
+            if (pilihanPengelolaan == 0) {
+                kembaliKePemilik = true;
+                System.out.println("Kembali ke menu pemilik.");
+            } else if (pilihanPengelolaan == 1) {
+                System.out.println("Fitur penambahan menu akan diimplementasikan pada tugas berikutnya.");
+            } else if (pilihanPengelolaan == 2) {
+                System.out.println("Fitur perubahan harga menu akan diimplementasikan pada tugas berikutnya.");
+            } else if (pilihanPengelolaan == 3) {
+                System.out.println("Fitur penghapusan menu akan diimplementasikan pada tugas berikutnya.");
             }
         }
     }
@@ -156,25 +292,36 @@ public class Main {
         int jumlahItemPesanan = 0;
 
         while (!pemesananSelesai) {
-            System.out.print("Masukkan nomor menu: ");
-            String inputMenu = scanner.nextLine().trim();
+            try {
+                if (!scanner.hasNextLine()) {
+                    pemesananSelesai = true;
+                    break;
+                }
 
-            if (inputMenu.equalsIgnoreCase("selesai")) {
-                pemesananSelesai = true;
-            } else if (inputMenu.isEmpty()) {
-                System.out.println("Nomor menu tidak boleh kosong. Silakan pilih nomor menu yang tersedia.");
-                continue;
-            } else {
+                System.out.print("Masukkan nomor menu: ");
+                String inputMenu = scanner.nextLine().trim();
+
+                if (inputMenu.equalsIgnoreCase("selesai")) {
+                    pemesananSelesai = true;
+                    continue;
+                }
+
+                if (inputMenu.isEmpty()) {
+                    System.out.println("Nomor menu tidak boleh kosong. Silakan pilih nomor menu yang tersedia.");
+                    continue;
+                }
+
                 int nomorMenu = 0;
                 boolean nomorValid = false;
 
                 try {
-                    nomorMenu = Integer.parseInt(inputMenu);
+                    long nomorLong = Long.parseLong(inputMenu);
 
-                    if (nomorMenu >= 1
-                            && nomorMenu <= daftarMenu.length
-                            && daftarMenu[nomorMenu - 1] != null) {
-                        nomorValid = true;
+                    if (nomorLong >= 1 && nomorLong <= daftarMenu.length && nomorLong <= Integer.MAX_VALUE) {
+                        nomorMenu = (int) nomorLong;
+                        if (daftarMenu[nomorMenu - 1] != null) {
+                            nomorValid = true;
+                        }
                     }
                 } catch (NumberFormatException e) {
                     nomorValid = false;
@@ -189,52 +336,74 @@ public class Main {
                 boolean jumlahValid = false;
 
                 while (!jumlahValid) {
-                    System.out.print("Masukkan jumlah: ");
-                    String inputJumlah = scanner.nextLine().trim();
-
-                    if (inputJumlah.equalsIgnoreCase("selesai")) {
-                        pemesananSelesai = true;
-                        break;
-                    } else if (inputJumlah.isEmpty()) {
-                        System.out.println("Jumlah tidak boleh kosong. Silakan masukkan bilangan bulat positif.");
-                        continue;
-                    }
-
                     try {
-                        jumlah = Integer.parseInt(inputJumlah);
+                        if (!scanner.hasNextLine()) {
+                            pemesananSelesai = true;
+                            break;
+                        }
 
-                        if (jumlah > 0) {
-                            jumlahValid = true;
-                        } else {
+                        System.out.print("Masukkan jumlah: ");
+                        String inputJumlah = scanner.nextLine().trim();
+
+                        if (inputJumlah.equalsIgnoreCase("selesai")) {
+                            pemesananSelesai = true;
+                            break;
+                        } else if (inputJumlah.isEmpty()) {
+                            System.out.println("Jumlah tidak boleh kosong. Silakan masukkan bilangan bulat positif.");
+                            continue;
+                        }
+
+                        try {
+                            long jumlahLong = Long.parseLong(inputJumlah);
+
+                            if (jumlahLong < Integer.MIN_VALUE || jumlahLong > Integer.MAX_VALUE) {
+                                System.out.println("Jumlah terlalu besar. Silakan masukkan bilangan bulat positif.");
+                                continue;
+                            }
+
+                            jumlah = (int) jumlahLong;
+
+                            if (jumlah > 0) {
+                                jumlahValid = true;
+                            } else {
+                                System.out.println("Jumlah harus berupa bilangan bulat positif. Silakan coba lagi.");
+                            }
+                        } catch (NumberFormatException e) {
                             System.out.println("Jumlah harus berupa bilangan bulat positif. Silakan coba lagi.");
                         }
-                    } catch (NumberFormatException e) {
-                        System.out.println("Jumlah harus berupa bilangan bulat positif. Silakan coba lagi.");
+                    } catch (Exception e) {
+                        pemesananSelesai = true;
+                        break;
                     }
                 }
 
-                if (!pemesananSelesai) {
-                    Menu menuTerpilih = daftarMenu[nomorMenu - 1];
-                    int indeksPesanan = cariIndeksPesanan(pesanan, jumlahItemPesanan, menuTerpilih);
-
-                    if (indeksPesanan != -1) {
-                        jumlahPesanan[indeksPesanan] = jumlahPesanan[indeksPesanan] + jumlah;
-                        System.out.println("Pesanan digabungkan: " + jumlah + " x "
-                                + menuTerpilih.getNama() + " (total "
-                                + jumlahPesanan[indeksPesanan] + ").");
-                    } else if (jumlahItemPesanan < pesanan.length) {
-                        pesanan[jumlahItemPesanan] = menuTerpilih;
-                        jumlahPesanan[jumlahItemPesanan] = jumlah;
-                        jumlahItemPesanan++;
-
-                        System.out.println("Pesanan dicatat: " + jumlah + " x " + menuTerpilih.getNama());
-                    } else {
-                        System.out.println("Kapasitas pesanan sudah penuh. Pesanan baru tidak dapat ditambahkan.");
-                        System.out.println("Data pesanan yang sudah tersimpan tetap dipertahankan.");
-                    }
-
-                    System.out.println();
+                if (pemesananSelesai) {
+                    continue;
                 }
+
+                Menu menuTerpilih = daftarMenu[nomorMenu - 1];
+                int indeksPesanan = cariIndeksPesanan(pesanan, jumlahItemPesanan, menuTerpilih);
+
+                if (indeksPesanan != -1) {
+                    jumlahPesanan[indeksPesanan] = jumlahPesanan[indeksPesanan] + jumlah;
+                    System.out.println("Pesanan digabungkan: " + jumlah + " x "
+                            + menuTerpilih.getNama() + " (total "
+                            + jumlahPesanan[indeksPesanan] + ").");
+                } else if (jumlahItemPesanan < pesanan.length) {
+                    pesanan[jumlahItemPesanan] = menuTerpilih;
+                    jumlahPesanan[jumlahItemPesanan] = jumlah;
+                    jumlahItemPesanan++;
+
+                    System.out.println("Pesanan dicatat: " + jumlah + " x " + menuTerpilih.getNama());
+                } else {
+                    System.out.println("Kapasitas pesanan sudah penuh. Pesanan baru tidak dapat ditambahkan.");
+                    System.out.println("Data pesanan yang sudah tersimpan tetap dipertahankan.");
+                }
+
+                System.out.println();
+            } catch (Exception e) {
+                pemesananSelesai = true;
+                break;
             }
         }
 
