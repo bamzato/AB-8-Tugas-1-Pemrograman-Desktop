@@ -341,7 +341,6 @@ public class Main {
             System.out.println("Nilai Promo: " + formatRupiah(nilaiPromo));
         } else {
             System.out.println("Promo Beli 1 Gratis 1: Tidak berlaku");
-            System.out.println("Nilai Promo: " + formatRupiah(0));
         }
 
         double dasarPajak = hitungDasarPajak(subtotal, diskon, nilaiPromo);
