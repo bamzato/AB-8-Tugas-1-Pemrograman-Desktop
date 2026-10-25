@@ -199,7 +199,7 @@ public class Main {
             } else if (pilihanPengelolaan == 2) {
                 ubahHargaMenu(scanner);
             } else if (pilihanPengelolaan == 3) {
-                System.out.println("Fitur penghapusan menu akan diimplementasikan pada tugas berikutnya.");
+                hapusMenuItems(scanner);
             }
         }
     }
@@ -895,10 +895,10 @@ public class Main {
         }
     }
 
-    private static boolean bacaKonfirmasi(Scanner scanner) {
+    private static boolean bacaKonfirmasi(Scanner scanner, String pesan) {
         while (true) {
             try {
-                System.out.print("Konfirmasi perubahan? (Ya/Tidak): ");
+                System.out.print(pesan);
                 System.out.flush();
                 if (!scanner.hasNextLine()) {
                     return false;
@@ -983,9 +983,9 @@ public class Main {
         System.out.println("Harga Baru     : " + formatRupiah(hargaBaru));
         System.out.println();
 
-        boolean konfirmasi = bacaKonfirmasi(scanner);
+        boolean konfirmasiUbah = bacaKonfirmasi(scanner, "Konfirmasi perubahan? (Ya/Tidak): ");
 
-        if (!konfirmasi) {
+        if (!konfirmasiUbah) {
             System.out.println("Perubahan dibatalkan. Harga tetap " + formatRupiah(menuDipilih.getHarga()) + ".");
             System.out.println();
             System.out.println("Kembali ke menu pengelolaan menu.");
@@ -1004,5 +1004,71 @@ public class Main {
             System.out.println();
             System.out.println("Kembali ke menu pengelolaan menu.");
         }
+    }
+
+    private static void hapusMenuItems(Scanner scanner) {
+        System.out.println();
+        System.out.println("=== HAPUS MENU ITEM ===");
+
+        tampilkanDaftarMenu();
+
+        int nomorTampil = bacaNomorMenuUntukPemilik(scanner);
+
+        if (nomorTampil == 0) {
+            System.out.println("Penghapusan dibatalkan.");
+            System.out.println();
+            System.out.println("Kembali ke menu pengelolaan menu.");
+            return;
+        }
+
+        if (nomorTampil == -1) {
+            System.out.println("Penghapusan dibatalkan.");
+            System.out.println();
+            System.out.println("Kembali ke menu pengelolaan menu.");
+            return;
+        }
+
+        int indeksMenu = getIndeksMenuBerdasarkanNomorTampil(daftarMenu, nomorTampil);
+
+        if (indeksMenu == -1 || daftarMenu[indeksMenu] == null) {
+            System.out.println("Nomor menu tidak valid. Penghapusan dibatalkan.");
+            System.out.println();
+            System.out.println("Kembali ke menu pengelolaan menu.");
+            return;
+        }
+
+        Menu menuDipilih = daftarMenu[indeksMenu];
+
+        System.out.println();
+        System.out.println("=== RINGKASAN PENGHAPUSAN MENU ===");
+        System.out.println("Nama Menu   : " + menuDipilih.getNama());
+        System.out.println("Kategori    : " + menuDipilih.getKategori());
+        System.out.println("Harga Saat Ini : " + formatRupiah(menuDipilih.getHarga()));
+        System.out.println();
+
+        boolean konfirmasiHapus = bacaKonfirmasi(scanner, "Konfirmasi penghapusan? (Ya/Tidak): ");
+
+        if (!konfirmasiHapus) {
+            System.out.println("Penghapusan dibatalkan. Menu tetap tersedia.");
+            System.out.println();
+            System.out.println("Kembali ke menu pengelolaan menu.");
+            return;
+        }
+
+        if (indeksMenu >= 0 && indeksMenu < daftarMenu.length - 1) {
+            for (int i = indeksMenu; i < daftarMenu.length - 1; i++) {
+                daftarMenu[i] = daftarMenu[i + 1];
+            }
+        }
+
+        if (daftarMenu.length > 0) {
+            daftarMenu[daftarMenu.length - 1] = null;
+        }
+
+        System.out.println("Menu berhasil dihapus.");
+        System.out.println(menuDipilih.getNama() + " telah dihapus dari daftar menu.");
+        System.out.println("Jumlah menu aktif saat ini: " + cariJumlahMenuTersedia(daftarMenu));
+        System.out.println();
+        System.out.println("Kembali ke menu pengelolaan menu.");
     }
 }
