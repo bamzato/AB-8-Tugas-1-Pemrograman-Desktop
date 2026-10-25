@@ -30,4 +30,12 @@ public class Menu {
     public String getKategori() {
         return kategori;
     }
+
+    public void setHarga(double harga) {
+        if (harga <= 0) {
+            throw new IllegalArgumentException("Harga menu harus lebih besar dari nol.");
+        }
+
+        this.harga = harga;
+    }
 }

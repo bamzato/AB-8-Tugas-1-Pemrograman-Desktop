@@ -197,7 +197,7 @@ public class Main {
             } else if (pilihanPengelolaan == 1) {
                 tambahMenuItems(scanner);
             } else if (pilihanPengelolaan == 2) {
-                System.out.println("Fitur perubahan harga menu akan diimplementasikan pada tugas berikutnya.");
+                ubahHargaMenu(scanner);
             } else if (pilihanPengelolaan == 3) {
                 System.out.println("Fitur penghapusan menu akan diimplementasikan pada tugas berikutnya.");
             }
@@ -296,12 +296,13 @@ public class Main {
 
         while (!pemesananSelesai) {
             try {
+                System.out.print("Masukkan nomor menu: ");
+                System.out.flush();
                 if (!scanner.hasNextLine()) {
                     pemesananSelesai = true;
                     break;
                 }
 
-                System.out.print("Masukkan nomor menu: ");
                 String inputMenu = scanner.nextLine().trim();
 
                 if (inputMenu.equalsIgnoreCase("selesai")) {
@@ -340,12 +341,13 @@ public class Main {
 
                 while (!jumlahValid) {
                     try {
+                        System.out.print("Masukkan jumlah: ");
+                        System.out.flush();
                         if (!scanner.hasNextLine()) {
                             pemesananSelesai = true;
                             break;
                         }
 
-                        System.out.print("Masukkan jumlah: ");
                         String inputJumlah = scanner.nextLine().trim();
 
                         if (inputJumlah.equalsIgnoreCase("selesai")) {
@@ -759,5 +761,248 @@ public class Main {
         System.out.println();
         System.out.println("----------------------------------------------------------------------");
         System.out.println("Total Akhir: " + formatRupiah(totalAkhir));
+    }
+
+    private static int cariJumlahMenuTersedia(Menu[] menuArr) {
+        int jumlah = 0;
+
+        for (int i = 0; i < menuArr.length; i++) {
+            if (menuArr[i] != null) {
+                jumlah++;
+            }
+        }
+
+        return jumlah;
+    }
+
+    private static int getIndeksMenuBerdasarkanNomorTampil(Menu[] menuArr, int nomorTampil) {
+        int hitung = 0;
+
+        for (int i = 0; i < menuArr.length; i++) {
+            if (menuArr[i] != null) {
+                hitung++;
+                if (hitung == nomorTampil) {
+                    return i;
+                }
+            }
+        }
+
+        return -1;
+    }
+
+    private static int bacaNomorMenuUntukPemilik(Scanner scanner) {
+        while (true) {
+            try {
+                System.out.print("Pilih nomor menu (0 untuk kembali): ");
+                System.out.flush();
+                if (!scanner.hasNextLine()) {
+                    return -1;
+                }
+
+                String input = scanner.nextLine().trim();
+
+                if (input.isEmpty()) {
+                    System.out.println("Nomor menu tidak boleh kosong. Silakan pilih nomor menu yang tersedia.");
+                    continue;
+                }
+
+                try {
+                    long nilaiLong = Long.parseLong(input);
+
+                    if (nilaiLong == 0) {
+                        return 0;
+                    }
+
+                    if (nilaiLong < Integer.MIN_VALUE || nilaiLong > Integer.MAX_VALUE) {
+                        System.out.println("Nomor menu tidak valid. Silakan pilih nomor menu yang tersedia.");
+                        continue;
+                    }
+
+                    int nomorTampil = (int) nilaiLong;
+                    int jumlahTersedia = cariJumlahMenuTersedia(daftarMenu);
+
+                    if (nomorTampil < 1 || nomorTampil > jumlahTersedia) {
+                        System.out.println("Nomor menu tidak valid. Silakan pilih nomor menu yang tersedia.");
+                        continue;
+                    }
+
+                    int indeksMenu = getIndeksMenuBerdasarkanNomorTampil(daftarMenu, nomorTampil);
+
+                    if (indeksMenu == -1 || daftarMenu[indeksMenu] == null) {
+                        System.out.println("Nomor menu tidak valid. Silakan pilih nomor menu yang tersedia.");
+                        continue;
+                    }
+
+                    return nomorTampil;
+                } catch (NumberFormatException e) {
+                    System.out.println("Nomor menu tidak valid. Silakan pilih nomor menu yang tersedia.");
+                }
+            } catch (Exception e) {
+                return -1;
+            }
+        }
+    }
+
+    private static double bacaHargaBaru(Scanner scanner) {
+        while (true) {
+            try {
+                System.out.print("Masukkan harga baru (Rp): ");
+                System.out.flush();
+                if (!scanner.hasNextLine()) {
+                    return -1;
+                }
+
+                String input = scanner.nextLine().trim();
+
+                if (input.isEmpty()) {
+                    System.out.println("Harga tidak boleh kosong. Silakan masukkan harga positif.");
+                    continue;
+                }
+
+                if (input.equalsIgnoreCase("selesai") || input.equalsIgnoreCase("batal")) {
+                    return -2;
+                }
+
+                String hargaBersih = input.replace("Rp", "").replace("rp", "").replace(".", "").replace(",", ".").trim();
+
+                if (!hargaBersih.matches("\\d+(\\.0+)?")) {
+                    System.out.println("Harga tidak valid. Masukkan angka positif (contoh: 25000).");
+                    continue;
+                }
+
+                String numericOnly = hargaBersih.split("\\.")[0];
+
+                if (numericOnly.startsWith("0") && numericOnly.length() > 1) {
+                    System.out.println("Harga tidak valid. Masukkan angka positif (contoh: 25000).");
+                    continue;
+                }
+
+                try {
+                    long hargaLong = Long.parseLong(numericOnly);
+
+                    if (hargaLong <= 0) {
+                        System.out.println("Harga harus berupa bilangan positif lebih besar dari 0.");
+                        continue;
+                    }
+
+                    return (double) hargaLong;
+                } catch (NumberFormatException e) {
+                    System.out.println("Harga tidak valid. Masukkan angka positif (contoh: 25000).");
+                }
+            } catch (Exception e) {
+                return -1;
+            }
+        }
+    }
+
+    private static boolean bacaKonfirmasi(Scanner scanner) {
+        while (true) {
+            try {
+                System.out.print("Konfirmasi perubahan? (Ya/Tidak): ");
+                System.out.flush();
+                if (!scanner.hasNextLine()) {
+                    return false;
+                }
+
+                String input = scanner.nextLine().trim();
+
+                if (input.isEmpty()) {
+                    System.out.println("Konfirmasi tidak boleh kosong. Masukkan Ya atau Tidak.");
+                    continue;
+                }
+
+                if (input.equalsIgnoreCase("ya")) {
+                    return true;
+                }
+
+                if (input.equalsIgnoreCase("tidak")) {
+                    return false;
+                }
+
+                System.out.println("Konfirmasi tidak valid. Masukkan Ya atau Tidak.");
+            } catch (Exception e) {
+                return false;
+            }
+        }
+    }
+
+    private static void ubahHargaMenu(Scanner scanner) {
+        System.out.println();
+        System.out.println("=== UBAH HARGA MENU ===");
+
+        tampilkanDaftarMenu();
+
+        int nomorTampil = bacaNomorMenuUntukPemilik(scanner);
+
+        if (nomorTampil == 0) {
+            System.out.println("Perubahan harga dibatalkan.");
+            System.out.println();
+            System.out.println("Kembali ke menu pengelolaan menu.");
+            return;
+        }
+
+        if (nomorTampil == -1) {
+            System.out.println("Perubahan harga dibatalkan.");
+            System.out.println();
+            System.out.println("Kembali ke menu pengelolaan menu.");
+            return;
+        }
+
+        int indeksMenu = getIndeksMenuBerdasarkanNomorTampil(daftarMenu, nomorTampil);
+
+        if (indeksMenu == -1 || daftarMenu[indeksMenu] == null) {
+            System.out.println("Nomor menu tidak valid. Perubahan harga dibatalkan.");
+            System.out.println();
+            System.out.println("Kembali ke menu pengelolaan menu.");
+            return;
+        }
+
+        Menu menuDipilih = daftarMenu[indeksMenu];
+
+        double hargaBaru = bacaHargaBaru(scanner);
+
+        if (hargaBaru == -1) {
+            System.out.println("Perubahan harga dibatalkan.");
+            System.out.println();
+            System.out.println("Kembali ke menu pengelolaan menu.");
+            return;
+        }
+
+        if (hargaBaru == -2) {
+            System.out.println("Perubahan harga dibatalkan.");
+            System.out.println();
+            System.out.println("Kembali ke menu pengelolaan menu.");
+            return;
+        }
+
+        System.out.println();
+        System.out.println("=== RINGKASAN PERUBAHAN HARGA ===");
+        System.out.println("Nama Menu   : " + menuDipilih.getNama());
+        System.out.println("Kategori    : " + menuDipilih.getKategori());
+        System.out.println("Harga Saat Ini : " + formatRupiah(menuDipilih.getHarga()));
+        System.out.println("Harga Baru     : " + formatRupiah(hargaBaru));
+        System.out.println();
+
+        boolean konfirmasi = bacaKonfirmasi(scanner);
+
+        if (!konfirmasi) {
+            System.out.println("Perubahan dibatalkan. Harga tetap " + formatRupiah(menuDipilih.getHarga()) + ".");
+            System.out.println();
+            System.out.println("Kembali ke menu pengelolaan menu.");
+            return;
+        }
+
+        try {
+            menuDipilih.setHarga(hargaBaru);
+            System.out.println("Harga menu berhasil diperbarui.");
+            System.out.println(menuDipilih.getNama() + " - " + formatRupiah(menuDipilih.getHarga()));
+            System.out.println();
+            System.out.println("Kembali ke menu pengelolaan menu.");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Gagal memperbarui harga: " + e.getMessage());
+            System.out.println("Perubahan dibatalkan. Harga tetap " + formatRupiah(menuDipilih.getHarga()) + ".");
+            System.out.println();
+            System.out.println("Kembali ke menu pengelolaan menu.");
+        }
     }
 }
