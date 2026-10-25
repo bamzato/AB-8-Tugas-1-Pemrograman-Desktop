@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Scanner;
 
@@ -9,8 +10,10 @@ public class Main {
     private static final double TARIF_PAJAK = 0.10;
     private static final double BIAYA_PELAYANAN = 20000;
 
+    private static Menu[] daftarMenu;
+
     public static void main(String[] args) {
-        Menu[] daftarMenu = buatDaftarMenu();
+        daftarMenu = buatDaftarMenu();
         Scanner scanner = new Scanner(System.in);
 
         boolean keluarAplikasi = false;
@@ -23,9 +26,9 @@ public class Main {
                 keluarAplikasi = true;
                 System.out.println("Terima kasih. Aplikasi telah keluar.");
             } else if (pilihanUtama == 1) {
-                jalankanPemesananPelanggan(scanner, daftarMenu);
+                jalankanPemesananPelanggan(scanner);
             } else if (pilihanUtama == 2) {
-                jalankanMenuPemilik(scanner, daftarMenu);
+                jalankanMenuPemilik(scanner);
             }
         }
 
@@ -59,7 +62,7 @@ public class Main {
         System.out.println("========================================");
     }
 
-    private static void tampilkanDaftarMenu(Menu[] daftarMenu) {
+    private static void tampilkanDaftarMenu() {
         System.out.println();
         System.out.println("========================================");
         System.out.println("          DAFTAR MENU RESTORAN");
@@ -95,16 +98,16 @@ public class Main {
         System.out.println("========================================");
     }
 
-    private static void tampilkanMenuBerdasarkanKategori(Menu[] daftarMenu, String kategori) {
+    private static void tampilkanMenuBerdasarkanKategori(Menu[] daftarMenuArr, String kategori) {
         System.out.println("--- " + kategori.toUpperCase() + " ---");
 
-        for (int i = 0; i < daftarMenu.length; i++) {
-            if (daftarMenu[i] != null && daftarMenu[i].getKategori().equals(kategori)) {
+        for (int i = 0; i < daftarMenuArr.length; i++) {
+            if (daftarMenuArr[i] != null && daftarMenuArr[i].getKategori().equals(kategori)) {
                 System.out.printf("%-4d %-20s %-10s %12s%n",
                         i + 1,
-                        daftarMenu[i].getNama(),
-                        daftarMenu[i].getKategori(),
-                        formatRupiah(daftarMenu[i].getHarga()));
+                        daftarMenuArr[i].getNama(),
+                        daftarMenuArr[i].getKategori(),
+                        formatRupiah(daftarMenuArr[i].getHarga()));
             }
         }
     }
@@ -153,11 +156,11 @@ public class Main {
         }
     }
 
-    private static void jalankanPemesananPelanggan(Scanner scanner, Menu[] daftarMenu) {
+    private static void jalankanPemesananPelanggan(Scanner scanner) {
         Menu[] pesanan = new Menu[KAPASITAS_PESANAN];
         int[] jumlahPesanan = new int[KAPASITAS_PESANAN];
 
-        tampilkanDaftarMenu(daftarMenu);
+        tampilkanDaftarMenu();
         int jumlahItemPesanan = prosesPemesanan(scanner, daftarMenu, pesanan, jumlahPesanan);
         tampilkanRingkasanPesanan(pesanan, jumlahPesanan, jumlahItemPesanan);
 
@@ -165,7 +168,7 @@ public class Main {
         System.out.println("Kembali ke menu utama.");
     }
 
-    private static void jalankanMenuPemilik(Scanner scanner, Menu[] daftarMenu) {
+    private static void jalankanMenuPemilik(Scanner scanner) {
         boolean kembaliKeUtama = false;
 
         while (!kembaliKeUtama) {
@@ -176,12 +179,12 @@ public class Main {
                 kembaliKeUtama = true;
                 System.out.println("Kembali ke menu utama.");
             } else if (pilihanPemilik == 1) {
-                jalankanMenuPengelolaanMenu(scanner, daftarMenu);
+                jalankanMenuPengelolaanMenu(scanner);
             }
         }
     }
 
-    private static void jalankanMenuPengelolaanMenu(Scanner scanner, Menu[] daftarMenu) {
+    private static void jalankanMenuPengelolaanMenu(Scanner scanner) {
         boolean kembaliKePemilik = false;
 
         while (!kembaliKePemilik) {
@@ -192,7 +195,7 @@ public class Main {
                 kembaliKePemilik = true;
                 System.out.println("Kembali ke menu pemilik.");
             } else if (pilihanPengelolaan == 1) {
-                System.out.println("Fitur penambahan menu akan diimplementasikan pada tugas berikutnya.");
+                tambahMenuItems(scanner);
             } else if (pilihanPengelolaan == 2) {
                 System.out.println("Fitur perubahan harga menu akan diimplementasikan pada tugas berikutnya.");
             } else if (pilihanPengelolaan == 3) {
@@ -419,6 +422,237 @@ public class Main {
         }
 
         return -1;
+    }
+
+    private static int cariIndeksMenuKosong(Menu[] menuArr) {
+        for (int i = 0; i < menuArr.length; i++) {
+            if (menuArr[i] == null) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    private static void perluasDaftarMenuJikaPenuh() {
+        int indeksKosong = cariIndeksMenuKosong(daftarMenu);
+
+        if (indeksKosong == -1) {
+            int kapasitasBaru = daftarMenu.length * 2;
+
+            if (kapasitasBaru < daftarMenu.length + 1) {
+                kapasitasBaru = daftarMenu.length + 1;
+            }
+
+            daftarMenu = Arrays.copyOf(daftarMenu, kapasitasBaru);
+            System.out.println("Kapasitas menu diperluas menjadi " + kapasitasBaru + " slot.");
+        }
+    }
+
+    private static String bacaInputWajib(Scanner scanner, String pesan) {
+        while (true) {
+            try {
+                System.out.print(pesan);
+                System.out.flush();
+
+                if (!scanner.hasNextLine()) {
+                    return null;
+                }
+
+                String input = scanner.nextLine();
+                String trimmed = input.trim();
+
+                if (trimmed.isEmpty()) {
+                    System.out.println("Input tidak boleh kosong. Silakan coba lagi.");
+                    continue;
+                }
+
+                return trimmed;
+            } catch (Exception e) {
+                return null;
+            }
+        }
+    }
+
+    private static String bacaNamaMenu(Scanner scanner) {
+        while (true) {
+            String nama = bacaInputWajib(scanner, "Nama menu (kosongkan untuk selesai): ");
+
+            if (nama == null) {
+                return null;
+            }
+
+            if (nama.equalsIgnoreCase("selesai")) {
+                return "SELESAI";
+            }
+
+            if (nama.matches("^-?\\d+(\\.\\d+)?$")) {
+                System.out.println("Nama menu tidak boleh berupa angka. Silakan masukkan nama menu.");
+                continue;
+            }
+
+            return nama;
+        }
+    }
+
+    private static double bacaHargaMenu(Scanner scanner) {
+        while (true) {
+            String input = bacaInputWajib(scanner, "Harga menu (Rp): ");
+
+            if (input == null) {
+                return -1;
+            }
+
+            if (input.equalsIgnoreCase("selesai")) {
+                return -2;
+            }
+
+            String hargaBersih = input.replace("Rp", "").replace("rp", "").replace(".", "").replace(",", ".").trim();
+
+            try {
+                String numericOnly = hargaBersih.replace(".", "");
+
+                if (!numericOnly.matches("\\d+")) {
+                    System.out.println("Harga tidak valid. Masukkan angka positif (contoh: 25000).");
+                    continue;
+                }
+
+                if (numericOnly.startsWith("0") && numericOnly.length() > 1) {
+                    System.out.println("Harga tidak valid. Masukkan angka positif (contoh: 25000).");
+                    continue;
+                }
+
+                long hargaLong = Long.parseLong(numericOnly);
+
+                if (hargaLong <= 0) {
+                    System.out.println("Harga harus berupa bilangan positif lebih besar dari 0.");
+                    continue;
+                }
+
+                double harga = (double) hargaLong;
+
+                return harga;
+            } catch (NumberFormatException e) {
+                System.out.println("Harga tidak valid. Masukkan angka positif (contoh: 25000).");
+            }
+        }
+    }
+
+    private static String bacaKategoriMenu(Scanner scanner) {
+        while (true) {
+            String input = bacaInputWajib(scanner, "Kategori (Makanan/Minuman, kosongkan untuk selesai): ");
+
+            if (input == null) {
+                return null;
+            }
+
+            if (input.equalsIgnoreCase("selesai")) {
+                return "SELESAI";
+            }
+
+            String kategori = input.trim();
+
+            if (kategori.equalsIgnoreCase("makanan")) {
+                return "Makanan";
+            }
+
+            if (kategori.equalsIgnoreCase("minuman")) {
+                return "Minuman";
+            }
+
+            System.out.println("Kategori tidak valid. Harus Makanan atau Minuman.");
+        }
+    }
+
+    private static void tambahMenuItems(Scanner scanner) {
+        System.out.println();
+        System.out.println("=== TAMBAH MENU ITEM ===");
+        System.out.println("Ketik 'selesai' pada nama menu untuk mengakhiri sesi penambahan.");
+
+        java.util.ArrayList<Menu> menuDitambahkan = new java.util.ArrayList<Menu>();
+
+        boolean selesaiTambah = false;
+
+        while (!selesaiTambah) {
+            String namaMenu = bacaNamaMenu(scanner);
+
+            if (namaMenu == null) {
+                selesaiTambah = true;
+                break;
+            }
+
+            if (namaMenu.equals("SELESAI")) {
+                selesaiTambah = true;
+                break;
+            }
+
+            double hargaMenu = bacaHargaMenu(scanner);
+
+            if (hargaMenu == -1) {
+                selesaiTambah = true;
+                break;
+            }
+
+            if (hargaMenu == -2) {
+                selesaiTambah = true;
+                break;
+            }
+
+            String kategoriMenu = bacaKategoriMenu(scanner);
+
+            if (kategoriMenu == null) {
+                selesaiTambah = true;
+                break;
+            }
+
+            if (kategoriMenu.equals("SELESAI")) {
+                selesaiTambah = true;
+                break;
+            }
+
+            try {
+                Menu menuBaru = new Menu(namaMenu, hargaMenu, kategoriMenu);
+                perluasDaftarMenuJikaPenuh();
+                int indeksKosong = cariIndeksMenuKosong(daftarMenu);
+
+                if (indeksKosong == -1) {
+                    daftarMenu = Arrays.copyOf(daftarMenu, daftarMenu.length + 1);
+                    indeksKosong = daftarMenu.length - 1;
+                }
+
+                daftarMenu[indeksKosong] = menuBaru;
+                menuDitambahkan.add(menuBaru);
+
+                System.out.println("Menu berhasil ditambahkan: " + menuBaru.getNama()
+                        + " | " + menuBaru.getKategori()
+                        + " | " + formatRupiah(menuBaru.getHarga()));
+                System.out.println("Tambahkan menu lain atau ketik 'selesai' pada nama menu.");
+                System.out.println();
+            } catch (IllegalArgumentException e) {
+                System.out.println("Gagal menambahkan menu: " + e.getMessage());
+                System.out.println("Silakan coba lagi dari awal item ini.");
+                System.out.println();
+            }
+        }
+
+        System.out.println();
+        System.out.println("=== RINGKASAN PENAMBAHAN MENU ===");
+
+        if (menuDitambahkan.isEmpty()) {
+            System.out.println("Tidak ada menu baru yang ditambahkan.");
+        } else {
+            for (int i = 0; i < menuDitambahkan.size(); i++) {
+                Menu menuBaru = menuDitambahkan.get(i);
+                System.out.println((i + 1) + ". " + menuBaru.getNama()
+                        + " - " + menuBaru.getKategori()
+                        + " - " + formatRupiah(menuBaru.getHarga()));
+            }
+
+            System.out.println("Jumlah menu ditambahkan: " + menuDitambahkan.size());
+        }
+
+        System.out.println();
+        System.out.println("Kembali ke menu pengelolaan menu.");
     }
 
     private static void tampilkanBarisItem(int nomor, Menu menu, int jumlah, double nilaiItem) {
